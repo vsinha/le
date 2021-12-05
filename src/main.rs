@@ -1,23 +1,18 @@
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
+    event::{Event, KeyCode},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
+use std::fs::File;
 use std::{
     error::Error,
     io::{self, BufRead, BufReader},
-    time::{Duration, Instant},
-};
-use std::{
-    fs::{self, File},
-    io::Read,
 };
 use tui::{
     backend::{Backend, CrosstermBackend},
-    layout::{Alignment, Constraint, Direction, Layout},
-    style::{Color, Modifier, Style},
-    text::{Span, Spans},
-    widgets::{Block, Borders, Paragraph, Wrap},
+    style::Style,
+    text::Spans,
+    widgets::Paragraph,
     Frame, Terminal,
 };
 
@@ -30,15 +25,9 @@ impl App {
     fn new(text: Vec<String>) -> App {
         App { scroll: 0, text }
     }
-
-    // fn on_tick(&mut self) {
-    //     self.scroll += 1;
-    //     self.scroll %= 10;
-    // }
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    // setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen)?;
@@ -48,9 +37,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     let f = File::open("example-file.md")?;
     let f = BufReader::new(f);
     let text = f.lines().map(|line| line.unwrap()).collect::<Vec<String>>();
-
-    // let mut data = Vec::new();Vj
-    // file.read_to_end(&mut data)?;
 
     let app = App::new(text);
     let res = run_app(&mut terminal, app);
@@ -89,35 +75,6 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
 }
 
 fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
-    let size = f.size();
-
-    // Words made "loooong" to demonstrate line breaking.
-    let s = "Veeeeeeeeeeeeeeeery    loooooooooooooooooong   striiiiiiiiiiiiiiiiiiiiiiiiiing.   ";
-    let mut long_line = s.repeat(usize::from(size.width) / s.len() + 4);
-    long_line.push('\n');
-
-    // let text = vec![
-    //     Spans::from("This is a line "),
-    //     Spans::from(Span::styled(
-    //         "This is a line   ",
-    //         Style::default().fg(Color::Red),
-    //     )),
-    //     Spans::from(Span::styled(
-    //         "This is a line",
-    //         Style::default().bg(Color::Blue),
-    //     )),
-    //     Spans::from(Span::styled(
-    //         "This is a longer line",
-    //         Style::default().add_modifier(Modifier::CROSSED_OUT),
-    //     )),
-    //     Spans::from(Span::styled(&long_line, Style::default().bg(Color::Green))),
-    //     Spans::from(Span::styled(
-    //         "This is a line",
-    //         Style::default()
-    //             .fg(Color::Green)
-    //             .add_modifier(Modifier::ITALIC),
-    //     )),
-    // ];
     let text = app
         .text
         .clone()
