@@ -59,7 +59,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     )
     .get_matches();
 
-    // let filename = ;
     let args = Args {
         filename: matches.value_of("FILENAME"),
         chop_long_lines: matches.is_present("chop"),
