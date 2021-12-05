@@ -60,14 +60,14 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
         if let Event::Key(key) = crossterm::event::read()? {
             match key.code {
                 KeyCode::Char('q') => return Ok(()),
-                // KeyCode::Char('k') => {
-                //     app.scroll -= 1;
-                //     return Ok(());
-                // }
-                // KeyCode::Char('j') => {
-                //     app.scroll += 1;
-                //     return Ok(());
-                // }
+                KeyCode::Char('k') => {
+                    if app.scroll > 0 {
+                        app.scroll -= 1;
+                    }
+                }
+                KeyCode::Char('j') => {
+                    app.scroll += 1;
+                }
                 _ => {}
             }
         }
