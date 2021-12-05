@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate clap;
+
 use crossterm::{
     event::{Event, KeyCode},
     execute,
@@ -22,23 +25,37 @@ struct App {
 }
 
 impl App {
-    fn new(text: Vec<String>) -> App {
-        App { scroll: 0, text }
+    fn new(filename: Option<&str>) -> Result<App, Box<dyn Error>> {
+        let text = match filename {
+            Some(filename) => {
+                let f = File::open(filename)?;
+                let f = BufReader::new(f);
+                f.lines().map(|line| line.unwrap()).collect::<Vec<String>>()
+            }
+            None => vec!["".to_owned()],
+        };
+        Ok(App { scroll: 0, text })
     }
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
+    let matches = clap_app!(le =>
+        (version: "0.1")
+        (author: "Viraj Sinha <root@vsinha.com>")
+        (about: "le is less than less")
+        (@arg FILENAME: "Sets the input file to use")
+    )
+    .get_matches();
+
+    let filename = matches.value_of("FILENAME");
+
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen)?;
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let f = File::open("example-file.md")?;
-    let f = BufReader::new(f);
-    let text = f.lines().map(|line| line.unwrap()).collect::<Vec<String>>();
-
-    let app = App::new(text);
+    let app = App::new(filename)?;
     let res = run_app(&mut terminal, app);
 
     // restore terminal
